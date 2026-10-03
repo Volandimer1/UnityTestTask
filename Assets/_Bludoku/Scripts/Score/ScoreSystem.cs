@@ -6,9 +6,6 @@ namespace _Bludoku.Scripts.Score
     {
         private static int _score;
         private static int _highScore;
-        private static bool _isBoosterEnabled;
-        private static int _comboCount;
-        private static int _consecutiveMisses;
         
         private const string ScoreKey = "CurrentScore";
         private const string HighScoreKey = "HighScore";
@@ -20,70 +17,54 @@ namespace _Bludoku.Scripts.Score
 
         public static int Score => _score;
         public static int HighScore => _highScore;
-        public static bool IsBoosterEnabled => _isBoosterEnabled;
-        public static int ComboCount => _comboCount;
-        public static int ConsecutiveMisses => _consecutiveMisses;
-
-        public static void SetBoostProgress(int comboCount, int consecutiveMisses, bool boosterEnabled)
-        {
-            _comboCount = comboCount;
-            _consecutiveMisses = consecutiveMisses;
-            _isBoosterEnabled = boosterEnabled;
-        }
 
         public static void LoadScore()
         {
             _score = PlayerPrefs.GetInt(ScoreKey, 0);
             _highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
-            _isBoosterEnabled = PlayerPrefs.GetInt(BoosterKey) == 1;
+        }
 
+        public static void LoadComboProgress(out int comboCount, out int consecutiveMisses)
+        {
             if (PlayerPrefs.HasKey(ComboCountKey) && PlayerPrefs.HasKey(ConsecutiveMissesKey))
             {
-                _comboCount = PlayerPrefs.GetInt(ComboCountKey);
-                _consecutiveMisses = PlayerPrefs.GetInt(ConsecutiveMissesKey);
+                comboCount = PlayerPrefs.GetInt(ComboCountKey);
+                consecutiveMisses = PlayerPrefs.GetInt(ConsecutiveMissesKey);
             }
             else
             {
                 // Existing saves only contain the booster flag. Restore the same minimum
-                // combo state that ScoreBoostSystem used before progress was persisted.
-                _comboCount = _isBoosterEnabled ? 2 : 0;
-                _consecutiveMisses = 0;
+                // combo state used before progress was persisted.
+                comboCount = PlayerPrefs.GetInt(BoosterKey, 0) == 1 ? 2 : 0;
+                consecutiveMisses = 0;
             }
         }
-        
-        public static void AddSetScore(int setsCount)
+
+        public static void RecordPlacement(int clearedCount, int comboCount, int consecutiveMisses,
+            bool boosterEnabled)
         {
-            int scoreToAdd = setsCount * ScoreForSet;
-            scoreToAdd = (int)(scoreToAdd * (IsBoosterEnabled ? BoosterMultiplier : 1));
-            
-            AddScore(scoreToAdd);
-        }
-        
-        public static void AddScore(int score)
-        {
-            _score = Score + score;
-            if (HighScore < Score)
-            {
-                _highScore = Score;
-            }
-            
-            SaveScore();
+            int scoreToAdd = clearedCount * ScoreForSet;
+            scoreToAdd = (int)(scoreToAdd * (boosterEnabled ? BoosterMultiplier : 1));
+
+            _score += scoreToAdd;
+            if (_highScore < _score)
+                _highScore = _score;
+
+            SaveProgress(comboCount, consecutiveMisses, boosterEnabled);
         }
 
         public static void ResetScore()
         {
             _score = 0;
-            _isBoosterEnabled = false;
-            _comboCount = 0;
-            _consecutiveMisses = 0;
-            SaveScore();
+            SaveProgress(0, 0, false);
         }
 
-        private static void SaveScore()
+        private static void SaveProgress(int comboCount, int consecutiveMisses, bool boosterEnabled)
         {
-            PlayerPrefs.SetInt(BoosterKey, IsBoosterEnabled ? 1 : 0);
-            PlayerPrefs.SetInt(ComboCountKey, ComboCount);
-            PlayerPrefs.SetInt(ConsecutiveMissesKey, ConsecutiveMisses);
+            PlayerPrefs.SetInt(ComboCountKey, comboCount);
+            PlayerPrefs.SetInt(ConsecutiveMissesKey, consecutiveMisses);
+            // Legacy saves may contain only this key; new saves derive booster state from combo progress.
+            PlayerPrefs.SetInt(BoosterKey, boosterEnabled ? 1 : 0);
             PlayerPrefs.SetInt(ScoreKey, Score);
             PlayerPrefs.SetInt(HighScoreKey, HighScore);
             PlayerPrefs.Save();

@@ -1,4 +1,5 @@
 using _Bludoku.Scripts.Boards;
+using _Bludoku.Scripts.Combo;
 using UnityEngine;
 
 namespace _Bludoku.Scripts.Score
@@ -8,45 +9,53 @@ namespace _Bludoku.Scripts.Score
         [SerializeField] private ScoreView scoreView;
         [SerializeField] private Board board;
         [SerializeField] private ScoreBoosterView boosterView;
-        
+
+        private ComboSystem _comboSystem;
         private readonly ScoreBoostSystem _scoreBoostSystem = new();
 
-        private void Awake()
+        public void Bind(ComboSystem comboSystem)
         {
-            board.OnFigurePlaced += FigurePlaced;
+            _comboSystem = comboSystem;
+            _comboSystem.ComboChanged += _scoreBoostSystem.OnComboChanged;
+            _scoreBoostSystem.BoosterChanged += boosterView.SetBoosterEnabled;
+            board.OnFigurePlaced += OnFigurePlaced;
         }
 
-        private void Start()
+        private void OnDestroy()
+        {
+            if (_comboSystem == null)
+                return;
+
+            board.OnFigurePlaced -= OnFigurePlaced;
+            _scoreBoostSystem.BoosterChanged -= boosterView.SetBoosterEnabled;
+            _comboSystem.ComboChanged -= _scoreBoostSystem.OnComboChanged;
+        }
+
+        public void RestoreProgress()
         {
             ScoreSystem.LoadScore();
-            _scoreBoostSystem.Restore(ScoreSystem.ComboCount, ScoreSystem.ConsecutiveMisses);
-            ScoreSystem.SetBoostProgress(_scoreBoostSystem.ComboCount, _scoreBoostSystem.ConsecutiveMisses,
-                _scoreBoostSystem.IsBoosted);
-            boosterView.SetBoosterEnabled(_scoreBoostSystem.IsBoosted);
+            ScoreSystem.LoadComboProgress(out int comboCount, out int consecutiveMisses);
+            _comboSystem.Restore(comboCount, consecutiveMisses);
             scoreView.UpdateScore(false);
         }
 
         public void ResetScore()
         {
-            _scoreBoostSystem.Reset();
+            _comboSystem.Reset();
             ScoreSystem.ResetScore();
-            UpdateView();
-        }
-
-        private void FigurePlaced(ClearResult result)
-        {
-            _scoreBoostSystem.FigurePlaced(result.ClearedCount);
-            boosterView.SetBoosterEnabled(_scoreBoostSystem.IsBoosted);
-            ScoreSystem.SetBoostProgress(_scoreBoostSystem.ComboCount, _scoreBoostSystem.ConsecutiveMisses,
-                _scoreBoostSystem.IsBoosted);
-            ScoreSystem.AddSetScore(result.ClearedCount);
-            scoreView.UpdateScore();
-        }
-
-        private void UpdateView()
-        {
-            boosterView.SetBoosterEnabled(false);
             scoreView.UpdateScore(false);
+        }
+
+        private void OnFigurePlaced(ClearResult result)
+        {
+            if (result.ClearedCount > 0)
+                _comboSystem.RecordSuccessfulAction();
+            else
+                _comboSystem.RecordUnsuccessfulAction();
+
+            ScoreSystem.RecordPlacement(result.ClearedCount, _comboSystem.ComboCount,
+                _comboSystem.ConsecutiveMisses, _scoreBoostSystem.IsBoosted);
+            scoreView.UpdateScore();
         }
     }
 }

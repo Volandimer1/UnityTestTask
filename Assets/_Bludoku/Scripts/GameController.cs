@@ -1,4 +1,5 @@
 using _Bludoku.Scripts.Boards;
+using _Bludoku.Scripts.Combo;
 using _Bludoku.Scripts.Core;
 using _Bludoku.Scripts.Score;
 using _Bludoku.Scripts.UI;
@@ -14,6 +15,7 @@ namespace _Bludoku.Scripts
         [SerializeField] private UIMediator uiMediator;
         [SerializeField] private Board board;
         [SerializeField] private FiguresController figuresController;
+        [SerializeField] private ComboFeedbackView comboFeedbackView;
 
         private void Awake()
         {
@@ -25,6 +27,11 @@ namespace _Bludoku.Scripts
 
         private void Start()
         {
+            var comboSystem = new ComboSystem();
+            scoreMediator.Bind(comboSystem);
+            comboFeedbackView.Bind(comboSystem);
+            scoreMediator.RestoreProgress();
+
             figuresController.OnGameOver += HandleGameOver;
 
             board.LoadGrid();

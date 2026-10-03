@@ -3,6 +3,7 @@
 These rules apply throughout this repository.
 
 - Do not create commits or push changes. Leave all changes for the human owner to review and commit.
+- Do not run `git diff`, `git diff --check`, or other automated diff checks. The human owner reviews changes; use only targeted file inspection needed to complete the task.
 - Do not make Unity player or Android builds, build solution files, or run other build commands.
 - Do not enter Unity Play mode or run gameplay validation or tests. The human owner performs that review and validation.
 - Preserve existing gameplay mechanics and functionality when implementing new features. Do not change an existing rule unless the human owner explicitly approves the change.
