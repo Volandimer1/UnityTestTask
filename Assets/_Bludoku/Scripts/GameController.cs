@@ -1,3 +1,4 @@
+using _Bludoku.Scripts.Analytics;
 using _Bludoku.Scripts.Boards;
 using _Bludoku.Scripts.Combo;
 using _Bludoku.Scripts.Core;
@@ -17,6 +18,8 @@ namespace _Bludoku.Scripts
         [SerializeField] private FiguresController figuresController;
         [SerializeField] private ComboFeedbackView comboFeedbackView;
 
+        private IAnalyticsService _analyticsService;
+
         private void Awake()
         {
             if (Instance == null)
@@ -27,11 +30,15 @@ namespace _Bludoku.Scripts
 
         private void Start()
         {
+            _analyticsService = new ConsoleAnalyticsService();
+
             var comboSystem = new ComboSystem();
             scoreMediator.Bind(comboSystem);
             comboFeedbackView.Bind(comboSystem);
             scoreMediator.RestoreProgress();
 
+            figuresController.OnFigureMoveResolved += TrackFigureMove;
+            scoreMediator.BoosterActivated += TrackBoosterActivation;
             figuresController.OnGameOver += HandleGameOver;
 
             board.LoadGrid();
@@ -51,6 +58,24 @@ namespace _Bludoku.Scripts
         {
             uiMediator.HideGameOver();
             figuresController.UpdateToEasyFigures();
+            _analyticsService.Track(AnalyticsEvent.PowerUpUsed("second_chance"));
+        }
+
+        private void OnDestroy()
+        {
+            figuresController.OnFigureMoveResolved -= TrackFigureMove;
+            scoreMediator.BoosterActivated -= TrackBoosterActivation;
+            figuresController.OnGameOver -= HandleGameOver;
+        }
+
+        private void TrackFigureMove(int figureId, bool accepted)
+        {
+            _analyticsService.Track(AnalyticsEvent.PieceMoved(figureId, accepted));
+        }
+
+        private void TrackBoosterActivation(int comboCount)
+        {
+            _analyticsService.Track(AnalyticsEvent.BonusReceived("score_boost", comboCount));
         }
 
         private void HandleGameOver()

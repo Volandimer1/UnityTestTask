@@ -9,6 +9,7 @@ namespace _Bludoku.Scripts.Core
     public class FiguresController : MonoBehaviour
     {
         public event Action OnGameOver;
+        public event Action<int, bool> OnFigureMoveResolved;
 
         [SerializeField] private Board board;
         [SerializeField] private List<Transform> figurePositions;
@@ -102,7 +103,10 @@ namespace _Bludoku.Scripts.Core
         {
             board.ClearHighlight();
 
-            if (board.CanPlaceFigure(figure))
+            bool accepted = board.CanPlaceFigure(figure);
+            OnFigureMoveResolved?.Invoke(figure.ID, accepted);
+
+            if (accepted)
                 PlaceFigure(figure);
             else
                 figure.SnapBack();

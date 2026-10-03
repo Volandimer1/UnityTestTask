@@ -1,3 +1,4 @@
+using System;
 using _Bludoku.Scripts.Boards;
 using _Bludoku.Scripts.Combo;
 using UnityEngine;
@@ -6,6 +7,8 @@ namespace _Bludoku.Scripts.Score
 {
     public class ScoreMediator : MonoBehaviour
     {
+        public event Action<int> BoosterActivated;
+
         [SerializeField] private ScoreView scoreView;
         [SerializeField] private Board board;
         [SerializeField] private ScoreBoosterView boosterView;
@@ -48,6 +51,8 @@ namespace _Bludoku.Scripts.Score
 
         private void OnFigurePlaced(ClearResult result)
         {
+            bool wasBoosted = _scoreBoostSystem.IsBoosted;
+
             if (result.ClearedCount > 0)
                 _comboSystem.RecordSuccessfulAction();
             else
@@ -56,6 +61,9 @@ namespace _Bludoku.Scripts.Score
             ScoreSystem.RecordPlacement(result.ClearedCount, _comboSystem.ComboCount,
                 _comboSystem.ConsecutiveMisses, _scoreBoostSystem.IsBoosted);
             scoreView.UpdateScore();
+
+            if (!wasBoosted && _scoreBoostSystem.IsBoosted)
+                BoosterActivated?.Invoke(_comboSystem.ComboCount);
         }
     }
 }
