@@ -19,13 +19,16 @@ namespace _Bludoku.Scripts.Score
         private void Start()
         {
             ScoreSystem.LoadScore();
-            boosterView.SetBoosterEnabled(ScoreSystem.IsBoosterEnabled);
-            _scoreBoostSystem.IsBoosted = ScoreSystem.IsBoosterEnabled;
+            _scoreBoostSystem.Restore(ScoreSystem.ComboCount, ScoreSystem.ConsecutiveMisses);
+            ScoreSystem.SetBoostProgress(_scoreBoostSystem.ComboCount, _scoreBoostSystem.ConsecutiveMisses,
+                _scoreBoostSystem.IsBoosted);
+            boosterView.SetBoosterEnabled(_scoreBoostSystem.IsBoosted);
             scoreView.UpdateScore(false);
         }
 
         public void ResetScore()
         {
+            _scoreBoostSystem.Reset();
             ScoreSystem.ResetScore();
             UpdateView();
         }
@@ -34,7 +37,8 @@ namespace _Bludoku.Scripts.Score
         {
             _scoreBoostSystem.FigurePlaced(result.ClearedCount);
             boosterView.SetBoosterEnabled(_scoreBoostSystem.IsBoosted);
-            ScoreSystem.SetBoosterEnabled(_scoreBoostSystem.IsBoosted);
+            ScoreSystem.SetBoostProgress(_scoreBoostSystem.ComboCount, _scoreBoostSystem.ConsecutiveMisses,
+                _scoreBoostSystem.IsBoosted);
             ScoreSystem.AddSetScore(result.ClearedCount);
             scoreView.UpdateScore();
         }
@@ -42,7 +46,6 @@ namespace _Bludoku.Scripts.Score
         private void UpdateView()
         {
             boosterView.SetBoosterEnabled(false);
-            _scoreBoostSystem.IsBoosted = false;
             scoreView.UpdateScore(false);
         }
     }
