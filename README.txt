@@ -12,6 +12,7 @@ The project owner compared the original and updated layouts on a tablet in Play 
 
 Other fixes and improvements
 
+- [Android startup fix] Added the project's existing AdMob app ID to the custom Android manifest. Without it, Google Mobile Ads crashed before Unity could open the first scene.
 - [Bug fix] Fixed the existing boost reset and save behavior: starting a new game clears the score, combo progress, grace moves, and booster together. Combo progress and consecutive non-clearing placements are now saved and restored, so restarting cannot restore the booster while resetting its grace-move allowance.
 - [Build setup fix] Removed a stale reference to a missing loading scene from Build Settings. The existing main menu is now the first scene, followed by the gameplay scene.
 - [Visual fix] Moved the in-game settings cog above the edge combo effects so it remains visible during high combos. The score panel stays below the effects; the game-over and settings panels still render above the cog.
@@ -29,6 +30,7 @@ Architectural decisions
 - ScoreBoostSystem owns the boost threshold and reacts to combo changes. The combo system does not depend on scoring or UI, so other feedback can subscribe without changing its rules.
 - Combo progress is stored with the existing score data in PlayerPrefs. Older saves that only have the booster flag still restore a compatible minimum combo state.
 - GameController creates the analytics provider and subscribes to gameplay events. Gameplay classes report move outcomes and booster activation without knowing about analytics; AnalyticsEvent factory methods define event names and properties. A different provider can implement IAnalyticsService without changing gameplay classes. Restoring an active booster does not count as receiving a new bonus.
+- Kept the existing main-menu-to-game scene flow and explicit scene references. For a two-scene assignment, this made the feature boundaries visible without introducing a bootstrap framework or changing unrelated project conventions.
 - Combo visuals subscribe to ComboSystem changes. ScoreMediator publishes the processed placement and current combo count for clear particles, so the visual tier is correct on the move that crosses a threshold. EffectsManager keeps the original clear effect and owns the new pooled particles. Selected art files are stored under Resources/ComboVfx; no complete third-party package was imported.
 - Visual thresholds are presentation choices kept in ComboVfxStages: x2 count and pulse, x3 electric text outline, x4-5 stronger outline and star clear particles, x6-7 edge lightning, x8-9 stronger lightning and small shake, x10 fire behind the count plus layered edge fire and fire clear particles instead of lightning, x11 brighter fire overlaps, and x12+ strongest pulse and intensity. The numeric combo count keeps increasing beyond x12. Non-clearing moves dim active effects; restoring a save brings back ambient effects without a success hit.
 
@@ -48,5 +50,8 @@ VFX asset credits (all CC0)
 
 What I would improve with more development time
 
-- Save the board, figures, score, and combo as one recoverable game-state snapshot so an interrupted placement cannot leave those saves out of sync.
-- If more systems need combo events, expose a read-only combo interface to observers while keeping action recording in the gameplay mediator.
+- Save the board, remaining figures, score, combo, and grace moves as one versioned game-state snapshot. They currently use separate file and PlayerPrefs writes, so an interrupted placement could restore mismatched progress. I would add recovery and migration for existing saves.
+- Add focused checks for combo and booster transitions, save restoration, and the three analytics event paths, then tune the result on target Android devices. In particular, I would check sustained VFX cost, readability, and timing across screen sizes and offer a lower-motion option if the effects prove distracting.
+- If analytics gains a real provider, keep the current gameplay-event boundary and add a documented event schema and provider adapter there. This would let events evolve without scattering provider calls through gameplay classes.
+- If the game grows into more scenes or needs shared services, introduce a clear composition point and explicit initialization order. A bootstrap scene and application state machine would then be useful; for this small project they would add more structure than the current flow needs. I would likewise adopt Addressables when content loading or delivery requires them.
+- If audio becomes part of the product, add a small audio service and mixer groups for separate music and sound-effect volume. I would also make VFX intensity and shader parameters easier to tune once the desired visual direction and device targets are known.
