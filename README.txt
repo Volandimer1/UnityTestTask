@@ -2,15 +2,26 @@ Unity Developer Test Assignment
 
 Implemented
 
-- Fixed the existing boost reset and save behavior: starting a new game clears the score, combo progress, grace moves, and booster together. Combo progress and consecutive non-clearing placements are now saved and restored, so restarting cannot restore the booster while resetting its grace-move allowance.
-- Added a combo system for accepted placements. Clearing at least one region advances the combo; three consecutive placements without a clear break it. Rejected placements do not affect it.
-- Connected the existing score booster to combo changes while preserving its x2 activation threshold and 1.5x score multiplier. Added an on-screen combo count with a short UI animation for continuing combos.
-- Added analytics events for accepted and rejected piece moves, score booster activation, and Second Chance use. The current provider writes event names and properties to the Unity Console.
-- Added staged combo feedback: a centered, content-sized count with pulse and a prominent, pulsing blue text outline, fast blue lightning tiles at their original aspect ratio along the screen edges, and light camera/score-panel shake on successful clears. Yellow-orange fire replaces the electric effects at x10; its edge tiles use offset frames, alternating flips, overlap, and small scale pulses to reduce visible repetition. Clearing blocks also emits larger, longer-lived blue stars at electric levels and fire particles at fire levels, alongside the original clear effect.
-- Moved the in-game settings cog above the edge combo effects so it remains visible during high combos. The score panel stays below the effects; the game-over and settings panels still render above the cog.
-- Placed the score panel and settings cog under a shared safe-area panel. Their top anchors now follow the device's visible area, while the combo edge effects still reach the full screen edges and retain their existing draw order.
-- Added a safe-area panel around the main menu settings cog inside its existing MainPanel, leaving the other menu elements at their current positions.
-- Removed a stale reference to a missing loading scene from Build Settings. The existing main menu is now the first scene, followed by the gameplay scene.
+Tablet layout and device safe-area fixes
+
+The project owner compared the original and updated layouts on a tablet in Play mode.
+
+- [Layout fix] Kept the gameplay score panel and settings cog inside the device safe area; combo edge effects still reach the screen edges.
+- [Layout fix] Kept the main menu settings cog inside the device safe area without moving the other menu elements.
+- [Layout fix] Framed the world-space board and three-piece tray below the score panel and above the bottom safe area. The background now fills the view independently, while board cells and figures keep their relative scale.
+
+Other fixes and improvements
+
+- [Bug fix] Fixed the existing boost reset and save behavior: starting a new game clears the score, combo progress, grace moves, and booster together. Combo progress and consecutive non-clearing placements are now saved and restored, so restarting cannot restore the booster while resetting its grace-move allowance.
+- [Build setup fix] Removed a stale reference to a missing loading scene from Build Settings. The existing main menu is now the first scene, followed by the gameplay scene.
+- [Visual fix] Moved the in-game settings cog above the edge combo effects so it remains visible during high combos. The score panel stays below the effects; the game-over and settings panels still render above the cog.
+
+Test assignment features
+
+- [Test task] Added a combo system for accepted placements. Clearing at least one region advances the combo; three consecutive placements without a clear break it. Rejected placements do not affect it.
+- [Test task] Connected the existing score booster to combo changes while preserving its x2 activation threshold and 1.5x score multiplier. Added an on-screen combo count with a short UI animation for continuing combos.
+- [Test task] Added analytics events for accepted and rejected piece moves, score booster activation, and Second Chance use. The current provider writes event names and properties to the Unity Console.
+- [Test task] Added staged combo feedback: a centered, content-sized count with pulse and a prominent, pulsing blue text outline, fast blue lightning tiles at their original aspect ratio along the screen edges, and light camera/score-panel shake on successful clears. Yellow-orange fire replaces the electric effects at x10; its edge tiles use offset frames, alternating flips, overlap, and small scale pulses to reduce visible repetition. Clearing blocks also emits larger, longer-lived blue stars at electric levels and fire particles at fire levels, alongside the original clear effect.
 
 Architectural decisions
 
