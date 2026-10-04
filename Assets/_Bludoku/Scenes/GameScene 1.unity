@@ -1449,11 +1449,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 765995491}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 743e507a1909b4a508a15e5f5d30d32a, type: 3}
+  m_Script: {fileID: 11500000, guid: 3d71956e1ad44c068f419e72d85b0c62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 1515902837}
-  m_FitType: 1
+  scorePanel: {fileID: 1464404211}
+  board: {fileID: 1631287397}
+  boardFrame: {fileID: 925365389}
+  tray: {fileID: 1902838770}
+  background: {fileID: 1515902837}
+  topPadding: 24
+  bottomPadding: 32
+  sidePadding: 32
+  preferredOrthographicSize: 8.76
 --- !u!1 &817152372
 GameObject:
   m_ObjectHideFlags: 0
