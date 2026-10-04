@@ -270,7 +270,7 @@ namespace _Bludoku.Scripts.Combo
                 return;
             _lastWidth = width;
             _lastHeight = height;
-            const float lightningThickness = 120f;
+            const float lightningThickness = 96f;
             const float lightningLength = lightningThickness * 4f; // 2048x512 source aspect ratio.
             for (int edge = 0; edge < _lightning.Length; edge++)
             {
