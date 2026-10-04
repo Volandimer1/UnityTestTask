@@ -8,6 +8,7 @@ namespace _Bludoku.Scripts.Score
     public class ScoreMediator : MonoBehaviour
     {
         public event Action<int> BoosterActivated;
+        public event Action<ClearResult, int> PlacementProcessed;
 
         [SerializeField] private ScoreView scoreView;
         [SerializeField] private Board board;
@@ -64,6 +65,8 @@ namespace _Bludoku.Scripts.Score
 
             if (!wasBoosted && _scoreBoostSystem.IsBoosted)
                 BoosterActivated?.Invoke(_comboSystem.ComboCount);
+
+            PlacementProcessed?.Invoke(result, _comboSystem.ComboCount);
         }
     }
 }

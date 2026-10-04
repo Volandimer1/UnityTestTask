@@ -2,6 +2,7 @@ using _Bludoku.Scripts.Analytics;
 using _Bludoku.Scripts.Boards;
 using _Bludoku.Scripts.Combo;
 using _Bludoku.Scripts.Core;
+using _Bludoku.Scripts.Effects;
 using _Bludoku.Scripts.Score;
 using _Bludoku.Scripts.UI;
 using UnityEngine;
@@ -17,6 +18,8 @@ namespace _Bludoku.Scripts
         [SerializeField] private Board board;
         [SerializeField] private FiguresController figuresController;
         [SerializeField] private ComboFeedbackView comboFeedbackView;
+        [SerializeField] private ComboScreenVfxView comboScreenVfxView;
+        [SerializeField] private EffectsManager effectsManager;
 
         private IAnalyticsService _analyticsService;
 
@@ -35,6 +38,8 @@ namespace _Bludoku.Scripts
             var comboSystem = new ComboSystem();
             scoreMediator.Bind(comboSystem);
             comboFeedbackView.Bind(comboSystem);
+            comboScreenVfxView.Bind(comboSystem);
+            scoreMediator.PlacementProcessed += effectsManager.PlayComboClearParticles;
             scoreMediator.RestoreProgress();
 
             figuresController.OnFigureMoveResolved += TrackFigureMove;
@@ -65,6 +70,7 @@ namespace _Bludoku.Scripts
         {
             figuresController.OnFigureMoveResolved -= TrackFigureMove;
             scoreMediator.BoosterActivated -= TrackBoosterActivation;
+            scoreMediator.PlacementProcessed -= effectsManager.PlayComboClearParticles;
             figuresController.OnGameOver -= HandleGameOver;
         }
 

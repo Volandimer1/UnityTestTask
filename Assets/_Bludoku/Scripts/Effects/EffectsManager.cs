@@ -10,11 +10,13 @@ namespace _Bludoku.Scripts.Effects
 
         private ParticleEffect _particleEffect;
         private VibrationEffect _vibrationEffect;
+        private ComboClearParticleEffect _comboClearParticles;
         
         private void Awake()
         {
             _particleEffect = new ParticleEffect(particles);
             _vibrationEffect = new VibrationEffect();
+            _comboClearParticles = new ComboClearParticleEffect(transform);
             
             board.OnFigurePlaced += OnFigurePlaced;
         }
@@ -23,6 +25,17 @@ namespace _Bludoku.Scripts.Effects
         {
             _vibrationEffect.Play(result);
             _particleEffect.Play(result);
+        }
+
+        public void PlayComboClearParticles(ClearResult result, int comboCount)
+        {
+            _comboClearParticles.Play(result, comboCount);
+        }
+
+        private void OnDestroy()
+        {
+            board.OnFigurePlaced -= OnFigurePlaced;
+            _comboClearParticles?.Dispose();
         }
     }
 }
