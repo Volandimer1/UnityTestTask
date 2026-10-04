@@ -240,7 +240,7 @@ namespace _Bludoku.Scripts.Combo
             _root.anchorMax = Vector2.one;
             _root.offsetMin = Vector2.zero;
             _root.offsetMax = Vector2.zero;
-            _root.SetSiblingIndex(1); // Behind the game-over panel.
+            _root.SetSiblingIndex(1); // Above ScorePanel, below the settings button and menu panels.
             _group = rootObject.GetComponent<CanvasGroup>();
             _group.blocksRaycasts = false;
             _group.interactable = false;
