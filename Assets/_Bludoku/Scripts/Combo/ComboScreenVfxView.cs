@@ -33,6 +33,7 @@ namespace _Bludoku.Scripts.Combo
         private int _lastFireFrame = -1;
         private float _lastWidth;
         private float _lastHeight;
+        private readonly Vector3[] _canvasCorners = new Vector3[4];
         private Tween _cameraShake;
         private Tween _panelShake;
 
@@ -235,11 +236,13 @@ namespace _Bludoku.Scripts.Combo
             _lightningFrames = ComboVfxAssets.LoadLightningFrames();
             var rootObject = new GameObject("ComboScreenVfx", typeof(RectTransform), typeof(CanvasGroup));
             _root = (RectTransform)rootObject.transform;
-            _root.SetParent(transform, false);
+            // Share the score panel's parent so the cog stays above these effects.
+            _root.SetParent(guiPanel != null ? guiPanel.parent : transform, false);
             _root.anchorMin = Vector2.zero;
             _root.anchorMax = Vector2.one;
             _root.offsetMin = Vector2.zero;
             _root.offsetMax = Vector2.zero;
+            FitToCanvas();
             _root.SetSiblingIndex(1); // Above ScorePanel, below the settings button and menu panels.
             _group = rootObject.GetComponent<CanvasGroup>();
             _group.blocksRaycasts = false;
@@ -264,6 +267,7 @@ namespace _Bludoku.Scripts.Combo
 
         private void ResizeForCanvas()
         {
+            FitToCanvas();
             float width = _root.rect.width;
             float height = _root.rect.height;
             if (Mathf.Approximately(width, _lastWidth) && Mathf.Approximately(height, _lastHeight))
@@ -306,6 +310,22 @@ namespace _Bludoku.Scripts.Combo
                 overlay.anchoredPosition = source.anchoredPosition +
                     (baseIndex < 14 ? new Vector2(width / 14f, 0f) : new Vector2(0f, height / 22f));
             }
+        }
+
+        private void FitToCanvas()
+        {
+            var canvasRect = (RectTransform)transform;
+            var parentRect = (RectTransform)_root.parent;
+            if (parentRect == canvasRect)
+                return;
+
+            canvasRect.GetWorldCorners(_canvasCorners);
+            Vector3 bottomLeft = parentRect.InverseTransformPoint(_canvasCorners[0]);
+            Vector3 topRight = parentRect.InverseTransformPoint(_canvasCorners[2]);
+            _root.offsetMin = new Vector2(bottomLeft.x - parentRect.rect.xMin,
+                bottomLeft.y - parentRect.rect.yMin);
+            _root.offsetMax = new Vector2(topRight.x - parentRect.rect.xMax,
+                topRight.y - parentRect.rect.yMax);
         }
 
         private void SetFireFrame(RawImage image, int frame, bool flipHorizontally)
